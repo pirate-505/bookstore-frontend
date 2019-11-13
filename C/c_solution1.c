@@ -30,7 +30,8 @@ char * calcBooksCost(Book_t * books[], size_t books_amount) {
 Book_t * parseBook(const char * book_str) {
   Book_t * new_book = malloc(sizeof(Book_t));
   char cur = book_str[strlen(book_str) - 1];
-  new_book->currency = (cur >= 48 && cur <= 57) ? '\0' : cur;
+
+  new_book->currency = isdigit(cur) ? '\0' : cur;
   new_book->value = strtol(book_str, NULL, 10);
   return new_book;
 }
