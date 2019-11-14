@@ -1,6 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+
+#if __WORDSIZE == 64
+# define ULONG_MAX_DIGIT_LENGTH 20
+#else
+# define ULONG_MAX_DIGIT_LENGTH 10
+#endif
+#define BOOK_COST_BUFSIZE (ULONG_MAX_DIGIT_LENGTH + sizeof(char) + 1)
 
 typedef struct {
     char currency;
@@ -8,19 +16,22 @@ typedef struct {
 } Book_t;
 
 char * calcBooksCost(Book_t * books[], size_t books_amount) {
-    static char result_buf[12 + sizeof(char) + 1] = "\0";
+    static char result_buf[BOOK_COST_BUFSIZE] = {0};
     unsigned long value_sum = 0;
+
     for (unsigned int i = 0; i < books_amount; i++) {
         value_sum += books[i]->value;
     }
-    sprintf(result_buf, "%ld%c", value_sum, books[0]->currency);
+    snprintf(result_buf, BOOK_COST_BUFSIZE - 1, "%lu%c", value_sum,
+            books[0]->currency);
     return result_buf;
 }
 
 Book_t * parseBook(const char * book_str) {
   Book_t * new_book = malloc(sizeof(Book_t));
   char cur = book_str[strlen(book_str) - 1];
-  new_book->currency = (cur >= 48 && cur <= 57) ? '\0' : cur;
+
+  new_book->currency = isdigit(cur) ? '\0' : cur;
   new_book->value = strtol(book_str, NULL, 10);
   return new_book;
 }
